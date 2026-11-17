@@ -1,0 +1,14 @@
+# IDE e sistema operativo
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Strumenti di sviluppo assistito (non parte del sistema)
+.claude/
+CLAUDE.md
+.superpowers/
+
+# Segreti
+.env

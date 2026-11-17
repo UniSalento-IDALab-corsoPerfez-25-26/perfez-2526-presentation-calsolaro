@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Logistics IoT</title>
+  <meta name="description" content="Project work del Corso di Perfezionamento 2025/2026, Università del Salento: identificazione dei pallet con RFID e BLE, monitoraggio e moduli AI per un magazzino logistico.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="hero-logo" src="assets/img/logo_unisalento.png" alt="Università del Salento">
+    <p class="eyebrow">Corso di Perfezionamento 2025/2026 · IDALab · Università del Salento</p>
+    <h1>Smart Logistics IoT</h1>
+    <p class="lead">Identificazione dei pallet con RFID e BLE, gestione delle aree di stoccaggio, monitoraggio dei carichi
+      e moduli di intelligenza artificiale per un magazzino logistico.</p>
+    <p class="author">Project work di Calsolaro</p>
+    <nav class="hero-nav" aria-label="Sezioni">
+      <a href="#progetto">Il progetto</a>
+      <a href="#architettura">Architettura</a>
+      <a href="#componenti">Componenti</a>
+      <a href="#funzionalita">Funzionalità</a>
+      <a href="#video">Video</a>
+      <a href="#risultati">Risultati</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section id="progetto" class="wrap">
+    <p class="label">Il progetto</p>
+    <h2>Il ciclo di vita del pallet, dall'arrivo alla consegna</h2>
+    <p>Il sistema segue ogni pallet in tutto il suo percorso nel magazzino. Il pallet arriva, viene identificato e stoccato
+      nell'area compatibile con la merce. Durante la permanenza e il trasporto è monitorato, finché non viene spedito e
+      consegnato. I dispositivi di campo (lettori RFID, sensori BLE dei carichi, sensori fissi di zona) sono simulati da un
+      servizio dedicato, che pubblica sullo stesso broker MQTT usato dai dispositivi reali.</p>
+    <figure class="figure">
+      <img src="assets/img/fig1_1_ciclo_pallet.png" alt="Ciclo di vita del pallet: arrivo, identificazione, stoccaggio, monitoraggio, spedizione" loading="lazy">
+    </figure>
+    <div class="grid cards-4">
+      <article class="card">
+        <h3>Identificazione</h3>
+        <p>Tag RFID letti ai varchi e ai portali, sensori BLE a bordo del carico. L'EventManager fonde le due tecnologie e
+          dà a ogni evento una confidenza alta, media o bassa.</p>
+      </article>
+      <article class="card">
+        <h3>Aree di stoccaggio</h3>
+        <p>Area refrigerata (0–8 °C), area sostanze critiche (gas e CO), magazzino generale. L'area di destinazione è
+          decisa dalla categoria della merce.</p>
+      </article>
+      <article class="card">
+        <h3>Monitoraggio</h3>
+        <p>Sensori fissi di zona e sensori BLE del carico. Le anomalie seguono il ciclo rilevata → presa in carico →
+          risolta, con allarme a ritenuta.</p>
+      </article>
+      <article class="card">
+        <h3>Moduli AI</h3>
+        <p>Isolation Forest per valutare le anomalie, Prophet e SBA per prevedere la domanda, CP-SAT per assegnare i
+          pallet ai camion.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="architettura" class="band">
+    <div class="wrap">
+      <p class="label">Architettura</p>
+      <h2>Microservizi coordinati a eventi</h2>
+      <p>Microservizi containerizzati su una rete Docker comune. I servizi comunicano a eventi tramite il broker <strong>MQTT
+        Mosquitto</strong>. I servizi di backend condividono un database <strong>PostgreSQL</strong>. Per ogni operazione il
+        browser chiama un solo servizio, e gli altri reagiscono agli eventi.</p>
+      <div class="split">
+        <figure class="figure">
+          <img src="assets/img/fig5_1_componenti.png" alt="Componenti del sistema: applicazione web, servizi di gestione, moduli di elaborazione, simulatore, PostgreSQL e broker MQTT" loading="lazy">
+          <figcaption>Componenti del sistema</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/img/fig4_2_percorso_messaggi.png" alt="Percorso dei messaggi dai dispositivi ai servizi attraverso il broker MQTT" loading="lazy">
+          <figcaption>Percorso dei messaggi dai dispositivi ai servizi</figcaption>
+        </figure>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Livello</th><th>Servizi</th><th>Tecnologie</th></tr></thead>
+          <tbody>
+            <tr><td>Edge (simulato)</td><td>simulation-service</td><td>Python, FastAPI, MQTT</td></tr>
+            <tr><td>Gateway</td><td>gateway-bridge-service, Mosquitto</td><td>Java 21, Spring Boot 3.4, Eclipse Paho</td></tr>
+            <tr><td>Backend</td><td>product-api, tracking-service, auth-service</td><td>Spring Boot, Spring Security (JWT), PostgreSQL 16</td></tr>
+            <tr><td>AI</td><td>ai-anomaly-detection, demand-forecasting, transport-optimizer</td><td>scikit-learn, Prophet, OR-Tools</td></tr>
+            <tr><td>Frontend</td><td>frontend</td><td>Angular 19, nginx</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="componenti" class="wrap">
+    <p class="label">Componenti</p>
+    <h2>Un repository per componente</h2>
+    <div class="grid cards-3">
+      <a class="card card-link" href="https://github.com/UniSalento-IDALab-corsoPerfez-25-26/perfez-2526-edge-simulator-calsolaro">
+        <span class="tag">Edge</span>
+        <h3>Edge Simulator</h3>
+        <p>Sensori fissi di zona, sensori BLE dei pallet e lettori RFID dei varchi, simulati e pubblicati su MQTT.</p>
+      </a>
+      <a class="card card-link" href="https://github.com/UniSalento-IDALab-corsoPerfez-25-26/perfez-2526-gateway-calsolaro">
+        <span class="tag">Gateway</span>
+        <h3>Gateway</h3>
+        <p>EventManager: fusione RFID/BLE, livelli di confidenza, coda di priorità in identificazione. Broker Mosquitto.</p>
+      </a>
+      <a class="card card-link" href="https://github.com/UniSalento-IDALab-corsoPerfez-25-26/perfez-2526-backend-calsolaro">
+        <span class="tag">Backend</span>
+        <h3>Backend</h3>
+        <p>Pallet, aree e anomalie (product-api), storico e telemetria (tracking), utenti e JWT (auth).</p>
+      </a>
+      <a class="card card-link" href="https://github.com/UniSalento-IDALab-corsoPerfez-25-26/perfez-2526-ai-services-calsolaro">
+        <span class="tag">AI</span>
+        <h3>AI Services</h3>
+        <p>Valutazione delle anomalie, previsione della domanda, ottimizzazione dei trasporti.</p>
+      </a>
+      <a class="card card-link" href="https://github.com/UniSalento-IDALab-corsoPerfez-25-26/perfez-2526-frontend-calsolaro">
+        <span class="tag">Frontend</span>
+        <h3>Frontend</h3>
+        <p>Dashboard Angular per tre ruoli: amministratore, responsabile di magazzino, responsabile della sicurezza.</p>
+      </a>
+      <a class="card card-link" href="https://github.com/UniSalento-IDALab-corsoPerfez-25-26/perfez-2526-deployment-calsolaro">
+        <span class="tag">Deployment</span>
+        <h3>Deployment</h3>
+        <p>Docker Compose dell'intero sistema, smoke test e suite di validazione funzionale e prestazionale.</p>
+      </a>
+    </div>
+  </section>
+
+  <section id="funzionalita" class="band">
+    <div class="wrap">
+      <p class="label">Funzionalità</p>
+      <h2>L'applicazione</h2>
+      <div class="gallery">
+        <figure class="figure">
+          <img src="assets/img/fig6_2_dashboard.png" alt="Dashboard: stato delle aree, pallet e anomalie" loading="lazy">
+          <figcaption>Dashboard: aree, pallet e anomalie aperte</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/img/fig6_3_arrivi_coda.png" alt="Arrivi e coda di priorità della zona di identificazione" loading="lazy">
+          <figcaption>Arrivi e coda di priorità in identificazione</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/img/storico_confidenza.png" alt="Storico dei movimenti con confidenza RFID/BLE" loading="lazy">
+          <figcaption>Tracciabilità con lettore RFID, gateway BLE e confidenza</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/img/fig6_6_anomalie_ia.png" alt="Gestione delle anomalie con valutazione AI" loading="lazy">
+          <figcaption>Anomalie con valutazione AI e spiegazione</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/img/fig6_4_piano_trasporto.png" alt="Piano di trasporto ottimizzato con CP-SAT" loading="lazy">
+          <figcaption>Piano di trasporto ottimizzato (CP-SAT)</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/img/fig7_1_consegna.png" alt="Riepilogo di conformità della consegna" loading="lazy">
+          <figcaption>Consegna con riepilogo di conformità del viaggio</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="video" class="wrap">
+    <p class="label">Video</p>
+    <h2>Il sistema in funzione</h2>
+    <div class="grid cards-2">
+      <figure class="video">
+        <video controls preload="none" poster="assets/video/V1_poster.png" src="assets/video/V1_magazzino_ingresso.mp4"></video>
+        <figcaption><strong>Ingresso e stoccaggio.</strong> Un pallet critico passa primo in coda. Dettaglio del sensore BLE, stoccaggio e storico con confidenza alta.</figcaption>
+      </figure>
+      <figure class="video">
+        <video controls preload="none" poster="assets/video/V2_poster.png" src="assets/video/V2_magazzino_trasporto.mp4"></video>
+        <figcaption><strong>Ordini, piano e viaggio.</strong> Piano ottimizzato, partenza del camion frigo, anomalia in viaggio e riepilogo della consegna.</figcaption>
+      </figure>
+      <figure class="video">
+        <video controls preload="none" poster="assets/video/V3_poster.png" src="assets/video/V3_sicurezza_anomalie.mp4"></video>
+        <figcaption><strong>Gestione di un'anomalia.</strong> Allarme di zona, valutazione AI, presa in carico, notifiche e risoluzione.</figcaption>
+      </figure>
+      <figure class="video">
+        <video controls preload="none" poster="assets/video/V4_poster.png" src="assets/video/V4_admin_utenti.mp4"></video>
+        <figcaption><strong>Utenti e accessi.</strong> Gestione degli utenti da parte dell'amministratore e menu per ruolo.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="risultati" class="band">
+    <div class="wrap">
+      <p class="label">Risultati</p>
+      <h2>Validazione</h2>
+      <p>Suite automatica di validazione eseguita sul sistema in esecuzione (30 ripetizioni per misura, con prove di
+        tolleranza ai guasti) e validazione offline dei modelli AI su dati sintetici etichettati.</p>
+      <div class="grid kpis">
+        <div class="kpi"><span class="kpi-value">22/22</span><span class="kpi-label">casi funzionali e di guasto superati</span></div>
+        <div class="kpi"><span class="kpi-value">&lt; 4 s</span><span class="kpi-label">p95 dall'arrivo del pallet allo storico (obiettivo 5 s)</span></div>
+        <div class="kpi"><span class="kpi-value">0,98</span><span class="kpi-label">ROC-AUC dell'Isolation Forest (aree e carichi BLE)</span></div>
+        <div class="kpi"><span class="kpi-value">11/11</span><span class="kpi-label">categorie in cui Prophet batte la Seasonal Naive sull'RMSE</span></div>
+      </div>
+      <p class="note">Unico obiettivo non raggiunto: il tempo di accesso (p95 520–636 ms, obiettivo 500 ms). Le anomalie AI
+        sono valutate su dati sintetici: il confronto con le sole soglie dipende da come sono costruite le anomalie di test.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Smart Logistics IoT · Project work di Calsolaro · Corso di Perfezionamento 2025/2026 · Università del Salento</p>
+    <p><a href="https://github.com/UniSalento-IDALab-corsoPerfez-25-26">UniSalento-IDALab-corsoPerfez-25-26</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
