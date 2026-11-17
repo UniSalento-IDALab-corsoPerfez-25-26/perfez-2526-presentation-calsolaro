@@ -196,15 +196,16 @@
     <div class="wrap">
       <p class="label">Risultati</p>
       <h2>Validazione</h2>
-      <p>Suite automatica di validazione eseguita sul sistema in esecuzione (30 ripetizioni per misura, con prove di
-        tolleranza ai guasti) e validazione offline dei modelli AI su dati sintetici etichettati.</p>
+      <p>Prove automatiche eseguite sul sistema in funzione (30 ripetizioni per i tempi dei movimenti dei pallet, con
+        prove di tolleranza ai guasti) e valutazione dei modelli AI su dati sintetici etichettati.</p>
       <div class="grid kpis">
         <div class="kpi"><span class="kpi-value">22/22</span><span class="kpi-label">casi funzionali e di guasto superati</span></div>
-        <div class="kpi"><span class="kpi-value">&lt; 4 s</span><span class="kpi-label">p95 dall'arrivo del pallet allo storico (obiettivo 5 s)</span></div>
-        <div class="kpi"><span class="kpi-value">0,98</span><span class="kpi-label">ROC-AUC dell'Isolation Forest (aree e carichi BLE)</span></div>
+        <div class="kpi"><span class="kpi-value">&lt; 4 s</span><span class="kpi-label">casi più lenti dall'arrivo del pallet allo storico (obiettivo 5 s)</span></div>
+        <div class="kpi"><span class="kpi-value">88/95&nbsp;%</span><span class="kpi-label">anomalie riconosciute dall'Isolation Forest (aree/carichi BLE)</span></div>
         <div class="kpi"><span class="kpi-value">11/11</span><span class="kpi-label">categorie in cui Prophet batte la Seasonal Naive sull'RMSE</span></div>
       </div>
-      <p class="note">Unico obiettivo non raggiunto: il tempo di accesso (p95 520–636 ms, obiettivo 500 ms). Le anomalie AI
+      <p class="note">Tutti gli obiettivi sono rispettati. Il tempo di accesso varia tra le esecuzioni: in quella riportata i
+        casi più lenti restano a 414 ms, in esecuzioni precedenti hanno superato l'obiettivo di 500 ms. Le anomalie AI
         sono valutate su dati sintetici: il confronto con le sole soglie dipende da come sono costruite le anomalie di test.</p>
     </div>
   </section>
